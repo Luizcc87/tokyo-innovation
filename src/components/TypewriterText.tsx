@@ -121,10 +121,15 @@ export function TypewriterText({
   // Robot glitch animation state
   const [robotGlitch, setRobotGlitch] = useState(false);
   
+  // Loop animation state: 'robot' | 'typing'
+  const [loopPhase, setLoopPhase] = useState<'robot' | 'typing'>('robot');
+  const [loopChars, setLoopChars] = useState<string[]>([]);
+  const loopText = '...';
+  
   useEffect(() => {
     if (!isComplete) return;
     
-    // Random micro glitch effect
+    // Random micro glitch effect for robot
     const glitchInterval = setInterval(() => {
       if (Math.random() > 0.7) {
         setRobotGlitch(true);
@@ -133,6 +138,68 @@ export function TypewriterText({
     }, 800);
 
     return () => clearInterval(glitchInterval);
+  }, [isComplete]);
+
+  // Loop animation: robot -> typing effect -> robot
+  useEffect(() => {
+    if (!isComplete) return;
+    
+    const loopCycle = () => {
+      // Show robot for 2-3 seconds
+      setLoopPhase('robot');
+      setLoopChars([]);
+      
+      const robotDuration = 2000 + Math.random() * 1000;
+      
+      setTimeout(() => {
+        // Start typing phase
+        setLoopPhase('typing');
+        let charIndex = 0;
+        
+        const typeLoopChar = () => {
+          if (charIndex >= loopText.length) {
+            // Pause then restart loop
+            setTimeout(loopCycle, 800);
+            return;
+          }
+          
+          // Glitch before revealing character
+          let glitchCount = 0;
+          const maxGlitches = 2 + Math.floor(Math.random() * 2);
+          
+          const glitchLoopChar = () => {
+            if (glitchCount < maxGlitches) {
+              const char = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+              setLoopChars(prev => {
+                const newChars = [...prev];
+                newChars[charIndex] = char;
+                return newChars;
+              });
+              glitchCount++;
+              setTimeout(glitchLoopChar, 40 + Math.random() * 30);
+            } else {
+              // Settle on actual character
+              setLoopChars(prev => {
+                const newChars = [...prev];
+                newChars[charIndex] = loopText[charIndex];
+                return newChars;
+              });
+              charIndex++;
+              setTimeout(typeLoopChar, 100 + Math.random() * 50);
+            }
+          };
+          
+          glitchLoopChar();
+        };
+        
+        typeLoopChar();
+      }, robotDuration);
+    };
+    
+    // Start the loop after initial delay
+    const initialDelay = setTimeout(loopCycle, 1500);
+    
+    return () => clearTimeout(initialDelay);
   }, [isComplete]);
 
   return (
@@ -187,8 +254,37 @@ export function TypewriterText({
         </span>
       )}
 
+      {/* Loop typing effect - glitch characters */}
+      {isComplete && loopPhase === 'typing' && (
+        <span className="inline-flex items-center ml-1" aria-hidden="true">
+          {loopChars.map((char, index) => (
+            <span
+              key={index}
+              className="inline-block text-tech-cyan"
+              style={{
+                textShadow: index === loopChars.length - 1
+                  ? '2px 0 hsl(var(--tech-magenta)), -2px 0 hsl(var(--tech-cyan)), 0 0 15px hsl(var(--tech-cyan))'
+                  : '0 0 10px hsl(var(--tech-cyan))',
+                animation: 'pulse 0.15s infinite',
+              }}
+            >
+              {char}
+            </span>
+          ))}
+          {/* Cursor during loop typing */}
+          <span
+            className="inline-block ml-0.5 text-tech-cyan"
+            style={{
+              textShadow: '0 0 12px hsl(var(--tech-cyan)), 0 0 24px hsl(var(--tech-cyan) / 0.6)',
+            }}
+          >
+            {cursorStates[cursorIndex]}
+          </span>
+        </span>
+      )}
+
       {/* Robot icon - appears after typing is complete */}
-      {isComplete && (
+      {isComplete && loopPhase === 'robot' && (
         <span
           className="inline-flex items-center ml-2 text-tech-cyan relative"
           style={{
