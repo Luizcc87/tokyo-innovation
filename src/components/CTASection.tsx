@@ -2,6 +2,7 @@ import { content } from '@/content';
 import { useRevealOnScroll } from '@/hooks/useRevealOnScroll';
 import { useParallax } from '@/hooks/useParallax';
 import { MessageCircle } from 'lucide-react';
+import { MagneticButton } from './MagneticButton';
 
 export function CTASection() {
   const { ref, isVisible } = useRevealOnScroll(0.2);
@@ -42,17 +43,19 @@ export function CTASection() {
             {content.cta.description}
           </p>
 
-          <a
+          <MagneticButton
             href={content.whatsappLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary inline-flex items-center gap-3 text-lg px-10 py-5"
+            variant="primary"
+            className="inline-flex items-center gap-3 text-lg px-10 py-5"
             aria-label="Chamar no WhatsApp"
-            style={{ transform: `translateY(${offset * 0.05}px)` }}
+            strength={0.45}
+            radius={180}
           >
             <MessageCircle size={22} aria-hidden="true" />
             {content.cta.button}
-          </a>
+          </MagneticButton>
 
           <p 
             className="mt-8 text-sm text-foreground-muted"
