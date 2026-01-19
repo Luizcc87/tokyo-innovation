@@ -3,7 +3,7 @@ import { useStaggerReveal } from '@/hooks/useRevealOnScroll';
 import { useParallax } from '@/hooks/useParallax';
 
 export function Method() {
-  const { containerRef, visibleItems } = useStaggerReveal(content.method.steps.length, 200);
+  const { containerRef, visibleItems, getItemStyle } = useStaggerReveal(content.method.steps.length, { baseDelay: 200, direction: 'up' });
   const { ref: parallaxRef, offset } = useParallax({ speed: 0.1, direction: 'up' });
 
   return (
@@ -51,9 +51,9 @@ export function Method() {
               return (
                 <div
                   key={step.title}
-                  className={`relative flex items-start gap-8 stagger-child ${visibleItems[index] ? 'visible' : ''}`}
+                  className="relative flex items-start gap-8"
                   style={{ 
-                    transitionDelay: `${index * 150}ms`,
+                    ...getItemStyle(index),
                     transform: `translateY(${stepOffset}px)`,
                   }}
                 >
