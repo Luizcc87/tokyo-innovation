@@ -4,6 +4,7 @@ import { useParallax } from '@/hooks/useParallax';
 import { MagneticButton } from './MagneticButton';
 import { TypewriterText } from './TypewriterText';
 import { StatsGrid } from './AnimatedCounter';
+import { AnimatedBackground } from './AnimatedBackground';
 
 const heroStats = [
   { value: 21, suffix: ' dias', label: 'Primeiro resultado' },
@@ -27,9 +28,11 @@ export function Hero() {
   return (
     <section
       ref={parallaxRef as React.RefObject<HTMLElement>}
-      className="relative min-h-screen flex items-center justify-center pt-20"
+      className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden"
       aria-labelledby="hero-heading"
     >
+      {/* Animated Background */}
+      <AnimatedBackground />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div
           ref={containerRef}
