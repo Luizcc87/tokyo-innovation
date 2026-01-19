@@ -123,14 +123,14 @@ export function TypewriterText({
       {displayedChars.map((char, index) => (
         <span
           key={index}
-          className="inline-block transition-all duration-100"
+          className={`inline-block transition-all duration-100 ${char === ' ' ? 'w-[0.3em]' : ''}`}
           style={{
-            textShadow: index === displayedChars.length - 1 && !isComplete
+            textShadow: index === displayedChars.length - 1 && !isComplete && char !== ' '
               ? '0 0 10px hsl(var(--tech-cyan)), 0 0 20px hsl(var(--tech-cyan) / 0.5)'
               : 'none',
           }}
         >
-          {char}
+          {char === ' ' ? '\u00A0' : char}
         </span>
       ))}
       
