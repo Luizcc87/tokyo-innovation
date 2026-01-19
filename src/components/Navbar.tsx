@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { content } from '@/content';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
 import { Menu, X } from 'lucide-react';
+import { MorphingLogo } from './MorphingLogo';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -55,7 +56,7 @@ export function Navbar() {
             className="font-display font-bold text-lg md:text-xl tracking-tight text-foreground"
             aria-label="Tokyo Innovation - Página inicial"
           >
-            {content.brand.name}
+            <MorphingLogo text={content.brand.name} />
           </a>
 
           {/* Desktop Navigation */}
