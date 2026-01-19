@@ -1,6 +1,7 @@
 import { content } from '@/content';
 import { useStaggerReveal } from '@/hooks/useRevealOnScroll';
-import { BarChart3, MessageSquare, Layers, Check } from 'lucide-react';
+import { BarChart3, MessageSquare, Layers } from 'lucide-react';
+import { SolutionCard } from './SolutionCard';
 
 const iconMap = {
   BarChart3,
@@ -36,35 +37,15 @@ export function Solutions() {
             const IconComponent = iconMap[card.icon as keyof typeof iconMap];
             
             return (
-              <article
+              <SolutionCard
                 key={card.title}
-                className={`tech-card stagger-child ${visibleItems[index] ? 'visible' : ''}`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 rounded-lg bg-tech-cyan/10 text-tech-cyan">
-                    <IconComponent size={24} aria-hidden="true" />
-                  </div>
-                  <h3 className="font-display font-semibold text-xl text-foreground">
-                    {card.title}
-                  </h3>
-                </div>
-
-                <p className="text-foreground-muted mb-6 leading-relaxed">
-                  {card.description}
-                </p>
-
-                <ul className="space-y-3" aria-label={`Benefícios de ${card.title}`}>
-                  {card.bullets.map((bullet) => (
-                    <li key={bullet} className="flex items-center gap-3 text-sm">
-                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Check size={12} className="text-primary" aria-hidden="true" />
-                      </span>
-                      <span className="text-foreground-muted">{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
+                icon={<IconComponent size={24} aria-hidden="true" />}
+                title={card.title}
+                description={card.description}
+                bullets={card.bullets}
+                isVisible={visibleItems[index]}
+                index={index}
+              />
             );
           })}
         </div>
