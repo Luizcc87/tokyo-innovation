@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { content } from '@/content';
+import { useScrollProgress } from '@/hooks/useScrollProgress';
 import { Menu, X } from 'lucide-react';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const scrollProgress = useScrollProgress();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,6 +36,17 @@ export function Navbar() {
       role="navigation"
       aria-label="Navegação principal"
     >
+      {/* Scroll Progress Indicator */}
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-transparent overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-tech-cyan via-tech-blue to-primary transition-all duration-150 ease-out"
+          style={{
+            width: `${scrollProgress}%`,
+            boxShadow: scrollProgress > 0 ? '0 0 10px rgba(79, 195, 247, 0.5), 0 0 20px rgba(79, 195, 247, 0.3)' : 'none',
+          }}
+        />
+      </div>
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}

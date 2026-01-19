@@ -1,6 +1,7 @@
 import { content } from '@/content';
 import { useRevealOnScroll } from '@/hooks/useRevealOnScroll';
 import { useParallax } from '@/hooks/useParallax';
+import { MagneticButton } from './MagneticButton';
 
 export function Hero() {
   const { ref, isVisible } = useRevealOnScroll(0.1);
@@ -60,22 +61,28 @@ export function Hero() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
+            <MagneticButton
               href={content.whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary text-base md:text-lg px-8 py-4"
+              variant="primary"
+              className="text-base md:text-lg px-8 py-4"
               aria-label="Quero começar - Abrir WhatsApp"
+              strength={0.4}
+              radius={150}
             >
               {content.hero.ctaPrimary}
-            </a>
-            <a
+            </MagneticButton>
+            <MagneticButton
               href="#metodo"
               onClick={handleMethodClick}
-              className="btn-secondary text-base md:text-lg px-8 py-4"
+              variant="secondary"
+              className="text-base md:text-lg px-8 py-4"
+              strength={0.35}
+              radius={120}
             >
               {content.hero.ctaSecondary}
-            </a>
+            </MagneticButton>
           </div>
 
           {/* Decorative element */}
