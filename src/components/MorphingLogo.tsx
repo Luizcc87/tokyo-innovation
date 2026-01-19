@@ -5,7 +5,7 @@ interface MorphingLogoProps {
   className?: string;
 }
 
-const glitchChars = '01';
+const glitchChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 export function MorphingLogo({ text, className = '' }: MorphingLogoProps) {
   const [displayText, setDisplayText] = useState(text);
