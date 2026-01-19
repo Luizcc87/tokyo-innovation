@@ -11,7 +11,7 @@ const iconMap = {
 };
 
 export function Governance() {
-  const { containerRef, visibleItems } = useStaggerReveal(content.governance.items.length, 100);
+  const { containerRef, visibleItems, getItemStyle } = useStaggerReveal(content.governance.items.length, { baseDelay: 100, direction: 'scale' });
   const { ref: parallaxRef, offset } = useParallax({ speed: 0.1, direction: 'up' });
 
   return (
@@ -61,9 +61,9 @@ export function Governance() {
             return (
               <div
                 key={item.title}
-                className={`tech-card text-center py-8 stagger-child ${visibleItems[index] ? 'visible' : ''}`}
+                className="tech-card text-center py-8"
                 style={{ 
-                  transitionDelay: `${index * 100}ms`,
+                  ...getItemStyle(index),
                   transform: `translateY(${itemOffset}px)`,
                 }}
               >

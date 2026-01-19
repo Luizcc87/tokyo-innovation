@@ -11,7 +11,7 @@ const iconMap = {
 };
 
 export function Solutions() {
-  const { containerRef, visibleItems } = useStaggerReveal(content.solutions.cards.length, 150);
+  const { containerRef, visibleItems, getItemStyle } = useStaggerReveal(content.solutions.cards.length, { baseDelay: 150, direction: 'up' });
   const { ref: parallaxRef, offset } = useParallax({ speed: 0.08, direction: 'up' });
 
   return (
@@ -55,7 +55,10 @@ export function Solutions() {
             return (
               <div 
                 key={card.title}
-                style={{ transform: `translateY(${cardOffset}px)` }}
+                style={{ 
+                  ...getItemStyle(index),
+                  transform: `translateY(${cardOffset}px)` 
+                }}
               >
                 <SolutionCard
                   icon={<IconComponent size={24} aria-hidden="true" />}

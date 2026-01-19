@@ -1,5 +1,5 @@
 import { content } from '@/content';
-import { useRevealOnScroll } from '@/hooks/useRevealOnScroll';
+import { useStaggerChildren } from '@/hooks/useRevealOnScroll';
 import { useParallax } from '@/hooks/useParallax';
 import { MagneticButton } from './MagneticButton';
 import { TypewriterText } from './TypewriterText';
@@ -11,8 +11,9 @@ const heroStats = [
   { value: 3, suffix: 'x', label: 'Mais produtividade' },
   { value: 50, suffix: '+', label: 'Empresas atendidas' },
 ];
+
 export function Hero() {
-  const { ref, isVisible } = useRevealOnScroll(0.1);
+  const { containerRef, getChildStyle } = useStaggerChildren({ staggerDelay: 120, threshold: 0.05 });
   const { ref: parallaxRef, offset } = useParallax({ speed: 0.15, direction: 'up' });
 
   const handleMethodClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -31,14 +32,17 @@ export function Hero() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div
-          ref={ref}
-          className={`max-w-4xl mx-auto text-center reveal ${isVisible ? 'visible' : ''}`}
+          ref={containerRef}
+          className="max-w-4xl mx-auto text-center"
           style={{ transform: `translateY(${offset * 0.5}px)` }}
         >
           {/* Badges */}
           <div 
             className="flex flex-wrap justify-center gap-3 mb-8"
-            style={{ transform: `translateY(${offset * 0.3}px)` }}
+            style={{ 
+              ...getChildStyle(0),
+              transform: `translateY(${offset * 0.3}px)` 
+            }}
           >
             {content.hero.badges.map((badge, index) => (
               <span
@@ -54,25 +58,34 @@ export function Hero() {
           <h1
             id="hero-heading"
             className="font-display font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight text-foreground mb-6"
-            style={{ transform: `translateY(${offset * 0.2}px)` }}
+            style={{ 
+              ...getChildStyle(1),
+              transform: `translateY(${offset * 0.2}px)` 
+            }}
           >
             <TypewriterText 
               text={content.hero.headline}
               typingSpeed={70}
-              startDelay={300}
+              startDelay={500}
             />
           </h1>
 
           {/* Subheadline */}
           <p 
             className="text-lg md:text-xl text-foreground-muted max-w-2xl mx-auto mb-10 leading-relaxed"
-            style={{ transform: `translateY(${offset * 0.1}px)` }}
+            style={{ 
+              ...getChildStyle(2),
+              transform: `translateY(${offset * 0.1}px)` 
+            }}
           >
             {content.hero.subheadline}
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div 
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            style={getChildStyle(3)}
+          >
             <MagneticButton
               href={content.whatsappLink}
               target="_blank"
@@ -100,7 +113,10 @@ export function Hero() {
           {/* Stats Grid */}
           <div 
             className="mt-16 md:mt-20"
-            style={{ transform: `translateY(${offset * -0.1}px)` }}
+            style={{ 
+              ...getChildStyle(4),
+              transform: `translateY(${offset * -0.1}px)` 
+            }}
           >
             <StatsGrid stats={heroStats} />
           </div>
@@ -108,7 +124,10 @@ export function Hero() {
           {/* Decorative element */}
           <div 
             className="mt-12 md:mt-16 flex justify-center"
-            style={{ transform: `translateY(${offset * -0.2}px)` }}
+            style={{ 
+              ...getChildStyle(5),
+              transform: `translateY(${offset * -0.2}px)` 
+            }}
           >
             <div className="w-px h-24 bg-gradient-to-b from-tech-cyan/50 to-transparent" />
           </div>
