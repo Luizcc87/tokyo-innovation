@@ -1,17 +1,32 @@
 import { content } from '@/content';
 import { useStaggerReveal } from '@/hooks/useRevealOnScroll';
+import { useParallax } from '@/hooks/useParallax';
 
 export function Method() {
   const { containerRef, visibleItems } = useStaggerReveal(content.method.steps.length, 200);
+  const { ref: parallaxRef, offset } = useParallax({ speed: 0.1, direction: 'up' });
 
   return (
     <section
       id="metodo"
-      className="relative py-24 md:py-32 bg-background-alt"
+      ref={parallaxRef as React.RefObject<HTMLElement>}
+      className="relative py-24 md:py-32 bg-background-alt overflow-hidden"
       aria-labelledby="method-heading"
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+      {/* Parallax background elements */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ transform: `translateY(${offset * 0.3}px)` }}
+      >
+        <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-tech-cyan/5 blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full bg-tech-blue/5 blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div 
+          className="text-center mb-16"
+          style={{ transform: `translateY(${offset * 0.15}px)` }}
+        >
           <h2
             id="method-heading"
             className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-foreground mb-4"
@@ -23,17 +38,24 @@ export function Method() {
 
         <div ref={containerRef} className="relative max-w-4xl mx-auto">
           {/* Timeline line */}
-          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-1/2" />
+          <div 
+            className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-1/2"
+            style={{ transform: `translateY(${offset * 0.05}px)` }}
+          />
 
           <div className="space-y-12 md:space-y-16">
             {content.method.steps.map((step, index) => {
               const isLeft = index % 2 === 0;
+              const stepOffset = offset * (0.08 + index * 0.02);
               
               return (
                 <div
                   key={step.title}
                   className={`relative flex items-start gap-8 stagger-child ${visibleItems[index] ? 'visible' : ''}`}
-                  style={{ transitionDelay: `${index * 150}ms` }}
+                  style={{ 
+                    transitionDelay: `${index * 150}ms`,
+                    transform: `translateY(${stepOffset}px)`,
+                  }}
                 >
                   {/* Mobile layout */}
                   <div className="md:hidden flex gap-6">
