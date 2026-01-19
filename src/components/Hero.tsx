@@ -3,7 +3,14 @@ import { useRevealOnScroll } from '@/hooks/useRevealOnScroll';
 import { useParallax } from '@/hooks/useParallax';
 import { MagneticButton } from './MagneticButton';
 import { TypewriterText } from './TypewriterText';
+import { StatsGrid } from './AnimatedCounter';
 
+const heroStats = [
+  { value: 21, suffix: ' dias', label: 'Primeiro resultado' },
+  { value: 95, suffix: '%', label: 'Taxa de satisfação' },
+  { value: 3, suffix: 'x', label: 'Mais produtividade' },
+  { value: 50, suffix: '+', label: 'Empresas atendidas' },
+];
 export function Hero() {
   const { ref, isVisible } = useRevealOnScroll(0.1);
   const { ref: parallaxRef, offset } = useParallax({ speed: 0.15, direction: 'up' });
@@ -90,9 +97,17 @@ export function Hero() {
             </MagneticButton>
           </div>
 
+          {/* Stats Grid */}
+          <div 
+            className="mt-16 md:mt-20"
+            style={{ transform: `translateY(${offset * -0.1}px)` }}
+          >
+            <StatsGrid stats={heroStats} />
+          </div>
+
           {/* Decorative element */}
           <div 
-            className="mt-16 md:mt-24 flex justify-center"
+            className="mt-12 md:mt-16 flex justify-center"
             style={{ transform: `translateY(${offset * -0.2}px)` }}
           >
             <div className="w-px h-24 bg-gradient-to-b from-tech-cyan/50 to-transparent" />
