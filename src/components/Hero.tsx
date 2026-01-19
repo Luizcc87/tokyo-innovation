@@ -2,6 +2,7 @@ import { content } from '@/content';
 import { useRevealOnScroll } from '@/hooks/useRevealOnScroll';
 import { useParallax } from '@/hooks/useParallax';
 import { MagneticButton } from './MagneticButton';
+import { TypewriterText } from './TypewriterText';
 
 export function Hero() {
   const { ref, isVisible } = useRevealOnScroll(0.1);
@@ -42,13 +43,17 @@ export function Hero() {
             ))}
           </div>
 
-          {/* Headline */}
+          {/* Headline with Typewriter Effect */}
           <h1
             id="hero-heading"
             className="font-display font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight text-foreground mb-6"
             style={{ transform: `translateY(${offset * 0.2}px)` }}
           >
-            {content.hero.headline}
+            <TypewriterText 
+              text={content.hero.headline}
+              typingSpeed={70}
+              startDelay={300}
+            />
           </h1>
 
           {/* Subheadline */}
