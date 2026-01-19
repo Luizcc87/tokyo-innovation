@@ -1,8 +1,10 @@
 import { content } from '@/content';
 import { useRevealOnScroll } from '@/hooks/useRevealOnScroll';
+import { useParallax } from '@/hooks/useParallax';
 
 export function Hero() {
   const { ref, isVisible } = useRevealOnScroll(0.1);
+  const { ref: parallaxRef, offset } = useParallax({ speed: 0.15, direction: 'up' });
 
   const handleMethodClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -14,6 +16,7 @@ export function Hero() {
 
   return (
     <section
+      ref={parallaxRef as React.RefObject<HTMLElement>}
       className="relative min-h-screen flex items-center justify-center pt-20"
       aria-labelledby="hero-heading"
     >
@@ -21,9 +24,13 @@ export function Hero() {
         <div
           ref={ref}
           className={`max-w-4xl mx-auto text-center reveal ${isVisible ? 'visible' : ''}`}
+          style={{ transform: `translateY(${offset * 0.5}px)` }}
         >
           {/* Badges */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
+          <div 
+            className="flex flex-wrap justify-center gap-3 mb-8"
+            style={{ transform: `translateY(${offset * 0.3}px)` }}
+          >
             {content.hero.badges.map((badge, index) => (
               <span
                 key={badge}
@@ -38,12 +45,16 @@ export function Hero() {
           <h1
             id="hero-heading"
             className="font-display font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight text-foreground mb-6"
+            style={{ transform: `translateY(${offset * 0.2}px)` }}
           >
             {content.hero.headline}
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-foreground-muted max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p 
+            className="text-lg md:text-xl text-foreground-muted max-w-2xl mx-auto mb-10 leading-relaxed"
+            style={{ transform: `translateY(${offset * 0.1}px)` }}
+          >
             {content.hero.subheadline}
           </p>
 
@@ -68,7 +79,10 @@ export function Hero() {
           </div>
 
           {/* Decorative element */}
-          <div className="mt-16 md:mt-24 flex justify-center">
+          <div 
+            className="mt-16 md:mt-24 flex justify-center"
+            style={{ transform: `translateY(${offset * -0.2}px)` }}
+          >
             <div className="w-px h-24 bg-gradient-to-b from-tech-cyan/50 to-transparent" />
           </div>
         </div>
