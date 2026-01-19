@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Bot } from 'lucide-react';
 
 interface TypewriterTextProps {
   text: string;
@@ -117,6 +118,23 @@ export function TypewriterText({
     return () => clearInterval(scanInterval);
   }, [isComplete]);
 
+  // Robot glitch animation state
+  const [robotGlitch, setRobotGlitch] = useState(false);
+  
+  useEffect(() => {
+    if (!isComplete) return;
+    
+    // Random micro glitch effect
+    const glitchInterval = setInterval(() => {
+      if (Math.random() > 0.7) {
+        setRobotGlitch(true);
+        setTimeout(() => setRobotGlitch(false), 100 + Math.random() * 150);
+      }
+    }, 800);
+
+    return () => clearInterval(glitchInterval);
+  }, [isComplete]);
+
   return (
     <span className={`relative inline ${className}`}>
       {/* Rendered characters */}
@@ -147,19 +165,18 @@ export function TypewriterText({
         </span>
       )}
       
-      {/* AI Cursor */}
-      <span
-        className="inline-block ml-0.5 text-tech-cyan relative"
-        style={{
-          textShadow: '0 0 12px hsl(var(--tech-cyan)), 0 0 24px hsl(var(--tech-cyan) / 0.6)',
-          opacity: isComplete ? 0.7 : 1,
-        }}
-        aria-hidden="true"
-      >
-        {cursorStates[cursorIndex]}
-        
-        {/* Scanning effect on cursor */}
-        {!isComplete && (
+      {/* AI Cursor - only show while typing */}
+      {!isComplete && (
+        <span
+          className="inline-block ml-0.5 text-tech-cyan relative"
+          style={{
+            textShadow: '0 0 12px hsl(var(--tech-cyan)), 0 0 24px hsl(var(--tech-cyan) / 0.6)',
+          }}
+          aria-hidden="true"
+        >
+          {cursorStates[cursorIndex]}
+          
+          {/* Scanning effect on cursor */}
           <span
             className="absolute inset-0 bg-gradient-to-b from-transparent via-tech-cyan/30 to-transparent pointer-events-none"
             style={{
@@ -167,8 +184,40 @@ export function TypewriterText({
               transition: 'transform 0.15s linear',
             }}
           />
-        )}
-      </span>
+        </span>
+      )}
+
+      {/* Robot icon - appears after typing is complete */}
+      {isComplete && (
+        <span
+          className="inline-flex items-center ml-2 text-tech-cyan relative"
+          style={{
+            animation: 'float 3s ease-in-out infinite',
+            textShadow: robotGlitch 
+              ? '2px 0 hsl(var(--tech-magenta)), -2px 0 hsl(var(--tech-cyan))'
+              : '0 0 12px hsl(var(--tech-cyan)), 0 0 24px hsl(var(--tech-cyan) / 0.5)',
+            transform: robotGlitch ? `translate(${Math.random() * 2 - 1}px, ${Math.random() * 2 - 1}px)` : 'none',
+            filter: robotGlitch ? 'brightness(1.3)' : 'none',
+            transition: 'filter 0.1s, text-shadow 0.1s',
+          }}
+          aria-hidden="true"
+        >
+          <Bot 
+            size={28} 
+            strokeWidth={1.5}
+            className="drop-shadow-[0_0_8px_hsl(var(--tech-cyan))]"
+          />
+          
+          {/* Ambient glow pulse */}
+          <span 
+            className="absolute inset-0 rounded-full opacity-30 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, hsl(var(--tech-cyan) / 0.4) 0%, transparent 70%)',
+              animation: 'pulse-glow 2s ease-in-out infinite',
+            }}
+          />
+        </span>
+      )}
 
       {/* Binary trail effect while typing */}
       {!isComplete && displayedChars.length > 0 && (
