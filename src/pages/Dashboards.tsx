@@ -574,19 +574,25 @@ function ChatSection() {
     setDisplayedMessages([]);
     setIsTyping(true);
     
-    let index = 0;
+    let currentIndex = 0;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    
     const addMessage = () => {
-      if (index < messages.length) {
-        setDisplayedMessages(prev => [...prev, messages[index]]);
-        index++;
-        setTimeout(addMessage, 600 + Math.random() * 400);
+      if (currentIndex < messages.length) {
+        const messageToAdd = messages[currentIndex];
+        setDisplayedMessages(prev => [...prev, messageToAdd]);
+        currentIndex++;
+        timeoutId = setTimeout(addMessage, 600 + Math.random() * 400);
       } else {
         setIsTyping(false);
       }
     };
     
-    const timer = setTimeout(addMessage, 300);
-    return () => clearTimeout(timer);
+    timeoutId = setTimeout(addMessage, 300);
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [activeTopic]);
 
   useEffect(() => {
