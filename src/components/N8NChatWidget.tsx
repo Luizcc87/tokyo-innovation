@@ -5,14 +5,22 @@ import { createChat } from '@n8n/chat';
 // Extend Window interface to track initialization
 declare global {
   interface Window {
-    __n8nChatInitialized?: boolean;
+    __TOKYO_N8N_CHAT_INITIALIZED__?: boolean;
   }
 }
 
 export function N8NChatWidget() {
   useEffect(() => {
-    // Prevent multiple initializations across route changes
-    if (window.__n8nChatInitialized) {
+    // Guard 1: Global flag to prevent multiple initializations
+    if (window.__TOKYO_N8N_CHAT_INITIALIZED__) {
+      return;
+    }
+
+    // Guard 2: Check if chat widget already exists in DOM (for HMR scenarios)
+    const existingChat = document.querySelector('.n8n-chat');
+    const existingToggle = document.querySelector('[class*="chat-toggle"]');
+    if (existingChat || existingToggle) {
+      window.__TOKYO_N8N_CHAT_INITIALIZED__ = true;
       return;
     }
 
@@ -32,7 +40,7 @@ export function N8NChatWidget() {
           subtitle: 'Respostas rápidas, em linguagem de dono.',
           footer: '',
           getStarted: 'Nova conversa',
-          inputPlaceholder: 'Escreva sua pergunta...',
+          inputPlaceholder: 'Digite sua pergunta…',
           closeButtonTooltip: 'Fechar',
         }
       },
@@ -43,7 +51,7 @@ export function N8NChatWidget() {
     });
 
     // Mark as initialized
-    window.__n8nChatInitialized = true;
+    window.__TOKYO_N8N_CHAT_INITIALIZED__ = true;
   }, []);
 
   // This component doesn't render anything visible
