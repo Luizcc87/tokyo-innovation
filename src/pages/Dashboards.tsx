@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { SEO, pageSEO } from '@/components/SEO';
 import { 
   TrendingUp, 
   MessageSquare, 
@@ -29,10 +29,6 @@ import { cn } from '@/lib/utils';
 
 // ==================== CONTENT ====================
 const dashboardsContent = {
-  seo: {
-    title: 'Dashboards com IA | Tokyo Innovation',
-    description: 'Transforme dados em decisão: dashboards com IA, previsões e alertas. Números do Negócio em linguagem simples, com resultado mensurável.',
-  },
   hero: {
     headline: 'Decida com dados, não no achismo.',
     subheadline: 'Dashboards com IA que transformam Números do Negócio em ação: alertas, previsões e recomendações em linguagem de dono.',
@@ -1008,22 +1004,7 @@ function FinalCTA() {
 export default function Dashboards() {
   return (
     <>
-      <Helmet>
-        <title>{dashboardsContent.seo.title}</title>
-        <meta name="description" content={dashboardsContent.seo.description} />
-        <link rel="canonical" href="/solucoes/dashboards" />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={dashboardsContent.seo.title} />
-        <meta property="og:description" content={dashboardsContent.seo.description} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="/solucoes/dashboards" />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={dashboardsContent.seo.title} />
-        <meta name="twitter:description" content={dashboardsContent.seo.description} />
-      </Helmet>
+      <SEO {...pageSEO.dashboards} />
       
       <div className="min-h-screen bg-background">
         <Navbar />
