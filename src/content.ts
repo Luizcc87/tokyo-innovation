@@ -15,6 +15,7 @@ export const content = {
     items: [
       { label: "Dashboards com IA", href: "/solucoes/dashboards", description: "Números do Negócio em linguagem de dono" },
       { label: "IA no WhatsApp", href: "/solucoes/whatsapp", description: "Atendimento e vendas organizados" },
+      { label: "Automação de Processos", href: "/solucoes/operacao", description: "Rotina organizada, operação mais leve" },
       { label: "Nichos", href: "/nichos", description: "Fluxos prontos por segmento" },
     ],
   },
