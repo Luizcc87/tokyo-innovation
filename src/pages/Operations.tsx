@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
   ArrowRight,
@@ -30,7 +30,41 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { MagneticButton } from '@/components/MagneticButton';
 import { useRevealOnScroll, useStaggerReveal } from '@/hooks/useRevealOnScroll';
+import { useParallax, useLayeredParallax } from '@/hooks/useParallax';
 import { cn } from '@/lib/utils';
+
+// Smooth section transition wrapper component
+interface SectionTransitionProps {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  direction?: 'up' | 'down' | 'left' | 'right';
+}
+
+function SectionTransition({ children, className, delay = 0, direction = 'up' }: SectionTransitionProps) {
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-50px');
+  
+  const transforms = {
+    up: 'translateY(60px)',
+    down: 'translateY(-60px)',
+    left: 'translateX(60px)',
+    right: 'translateX(-60px)',
+  };
+  
+  return (
+    <div
+      ref={ref}
+      className={cn('transition-all', className)}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translate(0, 0)' : transforms[direction],
+        transition: `opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 // ==================== CONTENT ====================
 const operationsContent = {
@@ -270,16 +304,34 @@ const operationsContent = {
 // ==================== COMPONENTS ====================
 
 function OperationsHero() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.05);
+  const { containerRef, offsets } = useLayeredParallax(3, 0.08);
+  const heroContentParallax = useParallax({ speed: 0.15, direction: 'up' });
   
   const scrollToExamples = () => {
     document.getElementById('gargalos')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Check for reduced motion preference
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
+
   return (
-    <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
-      {/* Background grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
+    <section 
+      ref={containerRef as React.RefObject<HTMLElement>}
+      className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden"
+    >
+      {/* Background grid pattern with parallax */}
+      <div 
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[0]}px)`,
+          transition: 'transform 0.1s ease-out',
+        }}
+      >
         <div 
           className="absolute inset-0"
           style={{
@@ -292,49 +344,109 @@ function OperationsHero() {
         />
       </div>
       
-      {/* Ambient glow */}
+      {/* Ambient glow with parallax - layer 1 */}
       <div 
         className="absolute top-1/4 right-0 w-[600px] h-[400px] rounded-full opacity-15 blur-[120px]"
-        style={{ background: 'hsl(var(--tech-cyan))' }}
+        style={{ 
+          background: 'hsl(var(--tech-cyan))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[1]}px) translateX(${offsets[0] * 0.5}px)`,
+          transition: 'transform 0.15s ease-out',
+        }}
       />
+      
+      {/* Ambient glow with parallax - layer 2 */}
       <div 
         className="absolute bottom-1/4 left-0 w-[400px] h-[300px] rounded-full opacity-10 blur-[100px]"
-        style={{ background: 'hsl(var(--tech-blue))' }}
+        style={{ 
+          background: 'hsl(var(--tech-blue))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[2]}px) translateX(${-offsets[0] * 0.3}px)`,
+          transition: 'transform 0.15s ease-out',
+        }}
+      />
+      
+      {/* Floating accent elements with parallax */}
+      <div 
+        className="absolute top-1/3 left-[15%] w-2 h-2 rounded-full opacity-40"
+        style={{ 
+          background: 'hsl(var(--tech-cyan))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[2] * 1.2}px)`,
+          transition: 'transform 0.1s ease-out',
+          boxShadow: '0 0 20px 5px hsl(var(--tech-cyan) / 0.3)',
+        }}
+      />
+      <div 
+        className="absolute bottom-1/3 right-[20%] w-1.5 h-1.5 rounded-full opacity-30"
+        style={{ 
+          background: 'hsl(var(--tech-blue))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[1] * 0.8}px)`,
+          transition: 'transform 0.1s ease-out',
+          boxShadow: '0 0 15px 3px hsl(var(--tech-blue) / 0.3)',
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-4xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-4xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible 
+              ? prefersReducedMotion ? 'none' : `translateY(${heroContentParallax.offset * 0.3}px)` 
+              : 'translateY(40px)',
+            transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
-          {/* Badges */}
+          {/* Badges with staggered animation */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {operationsContent.hero.badges.map((badge, i) => (
               <span 
                 key={i}
                 className="badge-default"
-                style={{ transitionDelay: `${i * 100}ms` }}
+                style={{ 
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.9)',
+                  transition: `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)`,
+                  transitionDelay: `${300 + i * 100}ms`,
+                }}
               >
                 {badge}
               </span>
             ))}
           </div>
           
-          {/* Headline */}
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+          {/* Headline with reveal animation */}
+          <h1 
+            className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 100ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 100ms',
+            }}
+          >
             {operationsContent.hero.headline}
           </h1>
           
           {/* Subheadline */}
-          <p className="text-lg sm:text-xl text-foreground-muted max-w-2xl mx-auto mb-10">
+          <p 
+            className="text-lg sm:text-xl text-foreground-muted max-w-2xl mx-auto mb-10"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(25px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 200ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 200ms',
+            }}
+          >
             {operationsContent.hero.subheadline}
           </p>
           
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* CTAs with staggered reveal */}
+          <div 
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 400ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 400ms',
+            }}
+          >
             <MagneticButton
               href={`https://wa.me/${operationsContent.whatsappNumber}?text=${encodeURIComponent(operationsContent.cta.whatsappMessage)}`}
               variant="primary"
@@ -353,23 +465,60 @@ function OperationsHero() {
           </div>
         </div>
       </div>
+      
+      {/* Scroll indicator */}
+      <div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        style={{
+          opacity: isVisible ? 0.5 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 1s ease-out 800ms, transform 1s ease-out 800ms',
+        }}
+      >
+        <div className="w-6 h-10 rounded-full border-2 border-foreground-muted/30 flex justify-center pt-2">
+          <div 
+            className="w-1 h-2 rounded-full bg-tech-cyan animate-bounce"
+            style={{ animationDuration: '2s' }}
+          />
+        </div>
+      </div>
     </section>
   );
 }
 
 function BottlenecksSection() {
-  const { ref, isVisible } = useRevealOnScroll();
-  const { containerRef, getItemStyle } = useStaggerReveal(6, { baseDelay: 100, direction: 'up' });
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const { containerRef, getItemStyle } = useStaggerReveal(6, { baseDelay: 80, direction: 'up' });
+  const sectionParallax = useParallax({ speed: 0.05, direction: 'up' });
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section id="gargalos" className="py-20 relative">
+    <section id="gargalos" className="py-24 relative overflow-hidden">
+      {/* Subtle decorative line */}
+      <div 
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24"
+        style={{ 
+          background: 'linear-gradient(to bottom, transparent, hsl(var(--tech-cyan) / 0.2), transparent)',
+        }}
+      />
+      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="mb-16"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible 
+              ? prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.2}px)` 
+              : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {operationsContent.bottlenecks.title}
@@ -388,10 +537,13 @@ function BottlenecksSection() {
             <div
               key={index}
               className={cn(
-                'tech-card group',
+                'tech-card group transition-all duration-500 hover:scale-[1.02] hover:border-tech-cyan/40',
                 index < 2 && 'lg:row-span-1'
               )}
-              style={getItemStyle(index)}
+              style={{
+                ...getItemStyle(index),
+                transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
             >
               <div className="flex items-start gap-4 mb-4">
                 <div 
@@ -445,11 +597,19 @@ function BottlenecksSection() {
 }
 
 function SimulatorSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
   const [requests, setRequests] = useState(operationsContent.simulator.inputs.requests.default);
   const [timePerRequest, setTimePerRequest] = useState(operationsContent.simulator.inputs.timePerRequest.default);
   const [rework, setRework] = useState(operationsContent.simulator.inputs.rework.default);
   const [hourlyCost, setHourlyCost] = useState(operationsContent.simulator.inputs.hourlyCost.default);
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   // Calculations
   const hoursPerMonth = (requests * 22 * timePerRequest) / 60;
@@ -464,19 +624,24 @@ function SimulatorSection() {
   };
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       <div 
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(180deg, transparent 0%, hsl(var(--surface) / 0.3) 50%, transparent 100%)' }}
+        style={{ 
+          background: 'linear-gradient(180deg, transparent 0%, hsl(var(--surface) / 0.3) 50%, transparent 100%)',
+          transform: prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.5}px)`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'text-center mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="text-center mb-14"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {operationsContent.simulator.title}
@@ -614,11 +779,19 @@ function SimulatorSection() {
 }
 
 function AssistantSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
   const [businessType, setBusinessType] = useState('');
   const [process, setProcess] = useState('');
   const [showChecklist, setShowChecklist] = useState(false);
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+  const sectionParallax = useParallax({ speed: 0.03, direction: 'up' });
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   const getChecklist = () => {
     const key = `${businessType}-${process}`;
@@ -651,14 +824,25 @@ function AssistantSection() {
   };
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
+      {/* Decorative elements */}
+      <div 
+        className="absolute top-20 right-[10%] w-32 h-32 rounded-full opacity-5 blur-[60px]"
+        style={{ 
+          background: 'hsl(var(--tech-cyan))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset}px)`,
+        }}
+      />
+      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'text-center mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="text-center mb-14"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {operationsContent.assistant.title}
@@ -840,11 +1024,19 @@ function AssistantSection() {
 }
 
 function ChatSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [displayedMessages, setDisplayedMessages] = useState<typeof operationsContent.chat.topics[0]['messages']>([]);
   const [isTyping, setIsTyping] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   useEffect(() => {
     if (!activeTopic) {
@@ -887,19 +1079,24 @@ function ChatSection() {
   }, [displayedMessages]);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       <div 
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(180deg, transparent 0%, hsl(var(--surface) / 0.3) 50%, transparent 100%)' }}
+        style={{ 
+          background: 'linear-gradient(180deg, transparent 0%, hsl(var(--surface) / 0.3) 50%, transparent 100%)',
+          transform: prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.3}px)`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'text-center mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="text-center mb-14"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {operationsContent.chat.title}
@@ -1031,17 +1228,20 @@ function ChatSection() {
 }
 
 function IntegrationsSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const { containerRef: chipsRef, getItemStyle } = useStaggerReveal(6, { baseDelay: 60, direction: 'scale' });
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-3xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-3xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-4">
             {operationsContent.integrations.title}
@@ -1050,16 +1250,17 @@ function IntegrationsSection() {
             {operationsContent.integrations.subtitle}
           </p>
           
-          {/* Integration chips */}
-          <div className="flex flex-wrap justify-center gap-3 mb-6">
+          {/* Integration chips with stagger animation */}
+          <div ref={chipsRef} className="flex flex-wrap justify-center gap-3 mb-6">
             {operationsContent.integrations.items.map((item, index) => (
               <span
                 key={index}
-                className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105"
+                className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-110 hover:border-tech-cyan/60"
                 style={{
+                  ...getItemStyle(index),
                   background: 'hsl(var(--surface))',
                   border: '1px solid hsl(var(--tech-cyan) / 0.3)',
-                  color: 'hsl(var(--tech-cyan))'
+                  color: 'hsl(var(--tech-cyan))',
                 }}
               >
                 {item}
@@ -1083,22 +1284,44 @@ function IntegrationsSection() {
 }
 
 function FinalCTASection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.1, '-30px');
+  const ctaParallax = useParallax({ speed: 0.06, direction: 'up' });
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-28 relative overflow-hidden">
       <div 
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.5), transparent)' }}
+        style={{ 
+          background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.5), transparent)',
+          transform: prefersReducedMotion ? 'none' : `translateY(${ctaParallax.offset * 0.3}px)`,
+        }}
+      />
+      
+      {/* Decorative glow */}
+      <div 
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full opacity-10 blur-[100px]"
+        style={{ 
+          background: 'hsl(var(--primary))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${ctaParallax.offset * 0.5}px)`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-2xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-2xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(60px) scale(0.98)',
+            transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {operationsContent.cta.title}
