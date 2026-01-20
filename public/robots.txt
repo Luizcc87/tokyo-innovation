@@ -17,7 +17,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://tokyo-innovation.lovable.app/sitemap.xml
+Sitemap: https://tokyoinnovation.com.br/sitemap.xml
 
 # Crawl-delay for polite crawling
 Crawl-delay: 1
