@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { 
+import { SEO, pageSEO } from '@/components/SEO';
+import {
   MessageSquare, 
   Bot, 
   User, 
@@ -1178,22 +1178,7 @@ function FinalCTA() {
 export default function WhatsAppPage() {
   return (
     <>
-      <Helmet>
-        <title>{whatsappContent.seo.title}</title>
-        <meta name="description" content={whatsappContent.seo.description} />
-        <link rel="canonical" href="/solucoes/whatsapp" />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={whatsappContent.seo.title} />
-        <meta property="og:description" content={whatsappContent.seo.description} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="/solucoes/whatsapp" />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={whatsappContent.seo.title} />
-        <meta name="twitter:description" content={whatsappContent.seo.description} />
-      </Helmet>
+      <SEO {...pageSEO.whatsapp} />
       
       <div className="min-h-screen bg-background">
         <Navbar />

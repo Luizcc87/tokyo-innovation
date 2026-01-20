@@ -1,3 +1,6 @@
+# https://www.robotstxt.org/robotstxt.html
+# Tokyo Innovation - Robots.txt
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,13 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://tokyo-innovation.lovable.app/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Disallow admin/private paths (if any)
+Disallow: /api/
+Disallow: /_

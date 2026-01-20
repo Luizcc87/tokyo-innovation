@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { 
+import { SEO, pageSEO } from '@/components/SEO';
+import {
   ArrowRight,
   Clock,
   ExternalLink,
@@ -1032,22 +1032,7 @@ function FinalCTA() {
 export default function NichosPage() {
   return (
     <>
-      <Helmet>
-        <title>{nichosContent.seo.title}</title>
-        <meta name="description" content={nichosContent.seo.description} />
-        <link rel="canonical" href="/nichos" />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={nichosContent.seo.title} />
-        <meta property="og:description" content={nichosContent.seo.description} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="/nichos" />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={nichosContent.seo.title} />
-        <meta name="twitter:description" content={nichosContent.seo.description} />
-      </Helmet>
+      <SEO {...pageSEO.nichos} />
       
       <div className="min-h-screen bg-background">
         <Navbar />

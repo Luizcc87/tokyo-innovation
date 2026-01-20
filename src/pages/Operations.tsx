@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { 
+import { SEO, pageSEO } from '@/components/SEO';
+import {
   ArrowRight,
   FileText,
   Database,
@@ -1352,18 +1352,7 @@ function FinalCTASection() {
 export default function OperationsPage() {
   return (
     <>
-      <Helmet>
-        <title>{operationsContent.seo.title}</title>
-        <meta name="description" content={operationsContent.seo.description} />
-        <meta property="og:title" content={operationsContent.seo.title} />
-        <meta property="og:description" content={operationsContent.seo.description} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://tokyo-innovation.lovable.app/solucoes/operacao" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={operationsContent.seo.title} />
-        <meta name="twitter:description" content={operationsContent.seo.description} />
-        <link rel="canonical" href="https://tokyo-innovation.lovable.app/solucoes/operacao" />
-      </Helmet>
+      <SEO {...pageSEO.operations} />
       
       <div className="min-h-screen bg-background">
         <Navbar />

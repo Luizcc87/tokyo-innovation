@@ -1,3 +1,4 @@
+import { SEO, pageSEO } from '@/components/SEO';
 import { TechBackground } from '@/components/TechBackground';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
@@ -10,6 +11,7 @@ import { Footer } from '@/components/Footer';
 export default function Home() {
   return (
     <div className="relative min-h-screen bg-background">
+      <SEO {...pageSEO.home} />
       <TechBackground />
       <Navbar />
       <main>
