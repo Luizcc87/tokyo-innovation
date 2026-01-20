@@ -73,7 +73,21 @@
   z-index: 9999 !important;
 }
 
-/* Toggle button styling - WhatsApp green */
+/* Pulse animation for toggle button */
+@keyframes chat-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 4px 12px rgba(37, 211, 102, 0.4),
+      0 0 20px rgba(37, 211, 102, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 4px 20px rgba(37, 211, 102, 0.6),
+      0 0 40px rgba(37, 211, 102, 0.4);
+  }
+}
+
+/* Toggle button styling - WhatsApp green with pulse */
 .n8n-chat .chat-toggle {
   background: #25D366 !important;
   border: none !important;
@@ -81,6 +95,7 @@
     0 4px 12px rgba(37, 211, 102, 0.4),
     0 0 20px rgba(37, 211, 102, 0.2) !important;
   transition: all 0.3s ease !important;
+  animation: chat-pulse 2s ease-in-out infinite;
 }
 
 .n8n-chat .chat-toggle:hover {
@@ -89,6 +104,7 @@
     0 6px 20px rgba(37, 211, 102, 0.5),
     0 0 30px rgba(37, 211, 102, 0.3) !important;
   transform: scale(1.08);
+  animation: none; /* Stop pulse on hover */
 }
 
 .n8n-chat .chat-toggle:active {
@@ -235,13 +251,14 @@
 }
 
 /* ============================================= */
-/* HIDE "Powered by n8n" - multiple selectors   */
+/* HIDE "Powered by n8n" - SAFE selectors only  */
+/* DO NOT use [class*="footer"] - it hides input */
 /* ============================================= */
-.n8n-chat [class*="powered"],
-.n8n-chat [class*="Powered"],
-.n8n-chat [class*="footer"] a,
-.n8n-chat .chat-footer a,
 .n8n-chat a[href*="n8n"],
+.n8n-chat a[href*="n8n.io"],
+.n8n-chat [class*="powered"],
+.n8n-chat [class*="powered-by"],
+.n8n-chat [class*="Powered"],
 .n8n-chat [class*="attribution"],
 .n8n-chat [class*="branding"] {
   display: none !important;
@@ -252,10 +269,22 @@
   pointer-events: none !important;
 }
 
-/* Also target common footer patterns */
-.n8n-chat .chat-footer,
-.n8n-chat [class*="chat-footer"] {
-  display: none !important;
+/* ============================================= */
+/* GUARANTEE input/composer is visible          */
+/* ============================================= */
+.n8n-chat textarea,
+.n8n-chat form,
+.n8n-chat [class*="composer"],
+.n8n-chat [class*="input"],
+.n8n-chat [class*="textarea"],
+.n8n-chat .chat-input {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.n8n-chat textarea {
+  min-height: 52px !important;
 }
 
 /* Scrollbar styling */
