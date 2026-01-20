@@ -287,9 +287,66 @@
   color: #FFFFFF !important;
 }
 
-/* Typing indicator */
-.n8n-chat .chat-typing-indicator span {
-  background: #4FC3F7 !important;
+/* Typing indicator - animated dots */
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+@keyframes typing-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(79, 195, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 8px 2px rgba(79, 195, 247, 0.6);
+  }
+}
+
+.n8n-chat .chat-typing-indicator,
+.n8n-chat [class*="typing"],
+.n8n-chat [class*="loading"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 12px 16px !important;
+  background: #0A1628 !important;
+  border: 1px solid #1B3A4A !important;
+  border-radius: 12px 12px 12px 4px !important;
+  margin: 8px 0 !important;
+}
+
+.n8n-chat .chat-typing-indicator span,
+.n8n-chat [class*="typing"] span,
+.n8n-chat [class*="typing"] div {
+  width: 10px !important;
+  height: 10px !important;
+  background: linear-gradient(135deg, #4FC3F7 0%, #2B7AB8 100%) !important;
+  border-radius: 50% !important;
+  animation: typing-bounce 1.4s ease-in-out infinite, typing-pulse 1.4s ease-in-out infinite !important;
+}
+
+.n8n-chat .chat-typing-indicator span:nth-child(1),
+.n8n-chat [class*="typing"] span:nth-child(1),
+.n8n-chat [class*="typing"] div:nth-child(1) {
+  animation-delay: 0s !important;
+}
+
+.n8n-chat .chat-typing-indicator span:nth-child(2),
+.n8n-chat [class*="typing"] span:nth-child(2),
+.n8n-chat [class*="typing"] div:nth-child(2) {
+  animation-delay: 0.2s !important;
+}
+
+.n8n-chat .chat-typing-indicator span:nth-child(3),
+.n8n-chat [class*="typing"] span:nth-child(3),
+.n8n-chat [class*="typing"] div:nth-child(3) {
+  animation-delay: 0.4s !important;
 }
 
 /* ============================================= */
