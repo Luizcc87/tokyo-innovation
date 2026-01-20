@@ -146,6 +146,12 @@ Site institucional da Tokyo Innovation, empresa de automação e IA localizada e
     - Geo tags para Santa Rosa/RS
     - Sitemap com todas as rotas
 
+- [x] **Imagem OG Personalizada**
+  - **Data:** 20 Janeiro 2026
+  - **Descrição:** Imagem 1200x630 para compartilhamento em redes sociais
+  - **Artefatos:** `public/og-image.png`
+  - **Resultado:** Imagem com identidade visual Tokyo Innovation, fundo navy, tipografia e elementos tech
+
 ---
 
 ## 📌 Próximas Etapas

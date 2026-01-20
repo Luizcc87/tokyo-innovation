@@ -16,7 +16,7 @@ interface SEOProps {
   };
 }
 
-const BASE_URL = "https://tokyoinnovation.com.br";
+const BASE_URL = "https://tokyo-innovation.lovable.app";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 const SITE_NAME = "Tokyo Innovation";
 
