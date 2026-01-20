@@ -1,4 +1,4 @@
-# Tokyo Innovation — Site Institucional (Lovable / React + Vite)
+# Tokyo Innovation — Site Institucional (React + Vite)
 
 Site institucional da **Tokyo Innovation** com visual **tech premium** (dark, azul/ciano, glow sutil), páginas de soluções com dados simulados (mock) e **chat embutido do n8n** (widget flutuante) para captação e qualificação de leads.
 
@@ -27,8 +27,7 @@ Site institucional da **Tokyo Innovation** com visual **tech premium** (dark, az
 
 ## 🔗 Links
 
-- **Lovable Project:** [https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID)
-- **Preview / Produção:** REPLACE_WITH_PROD_URL
+- **Preview / Produção:** tokyoinnovation.com.br
 - **Chat n8n (Webhook):** `https://webh1.tokyoinnovation.com.br/webhook/840023e5-95f6-41d9-b078-3f7f8808cc58/chat`
 
 ---
