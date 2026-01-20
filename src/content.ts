@@ -10,14 +10,14 @@ export const content = {
       { label: "Método", href: "#metodo" },
       { label: "Governança", href: "#governanca" },
     ],
-    solutions: {
-      label: "Soluções",
-      items: [
-        { label: "Dashboards com IA", href: "/solucoes/dashboards", description: "Números do Negócio em linguagem de dono" },
-        { label: "IA no WhatsApp", href: "/solucoes/whatsapp", description: "Atendimento e vendas organizados" },
-        { label: "IA por Nicho", href: "/solucoes/nichos", description: "Fluxos prontos por segmento" },
-      ],
-    },
+  solutions: {
+    label: "Soluções",
+    items: [
+      { label: "Dashboards com IA", href: "/solucoes/dashboards", description: "Números do Negócio em linguagem de dono" },
+      { label: "IA no WhatsApp", href: "/solucoes/whatsapp", description: "Atendimento e vendas organizados" },
+      { label: "Nichos", href: "/nichos", description: "Fluxos prontos por segmento" },
+    ],
+  },
     cta: "Quero começar",
   },
   
