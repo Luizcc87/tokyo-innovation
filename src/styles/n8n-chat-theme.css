@@ -190,22 +190,64 @@
   box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2) !important;
 }
 
-/* Send button */
-.n8n-chat .chat-input button[type="submit"] {
-  background: #38E08F !important;
-  color: #000000 !important;
+/* Send button - comprehensive selectors */
+.n8n-chat .chat-input button,
+.n8n-chat .chat-input button[type="submit"],
+.n8n-chat [class*="composer"] button,
+.n8n-chat [class*="input"] button,
+.n8n-chat form button[type="submit"],
+.n8n-chat button[class*="send"] {
+  background: linear-gradient(135deg, #4FC3F7 0%, #2B7AB8 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
   border-radius: 10px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  padding: 10px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   transition: all 0.2s ease !important;
 }
 
-.n8n-chat .chat-input button[type="submit"]:hover {
-  background: #2BC975 !important;
+.n8n-chat .chat-input button:hover,
+.n8n-chat .chat-input button[type="submit"]:hover,
+.n8n-chat [class*="composer"] button:hover,
+.n8n-chat form button[type="submit"]:hover {
+  background: linear-gradient(135deg, #38E08F 0%, #2BC975 100%) !important;
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(79, 195, 247, 0.3) !important;
 }
 
-.n8n-chat .chat-input button[type="submit"]:disabled {
+.n8n-chat .chat-input button:disabled,
+.n8n-chat .chat-input button[type="submit"]:disabled,
+.n8n-chat [class*="composer"] button:disabled {
   background: #1B3A4A !important;
   color: #8BA3B9 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Send button icon - ensure visibility */
+.n8n-chat .chat-input button svg,
+.n8n-chat .chat-input button[type="submit"] svg,
+.n8n-chat [class*="composer"] button svg,
+.n8n-chat form button[type="submit"] svg,
+.n8n-chat button[class*="send"] svg {
+  width: 20px !important;
+  height: 20px !important;
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Send button icon path (for SVG icons) */
+.n8n-chat .chat-input button svg path,
+.n8n-chat [class*="composer"] button svg path {
+  fill: #FFFFFF !important;
+  stroke: #FFFFFF !important;
 }
 
 /* Welcome screen */
