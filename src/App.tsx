@@ -10,6 +10,7 @@ import WhatsAppPage from "./pages/WhatsApp";
 import NichosPage from "./pages/Nichos";
 import OperationsPage from "./pages/Operations";
 import NotFound from "./pages/NotFound";
+import { N8NChatWidget } from "./components/N8NChatWidget";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <N8NChatWidget />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/solucoes/dashboards" element={<Dashboards />} />
