@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
   MessageSquare, 
@@ -31,6 +31,7 @@ import { Footer } from '@/components/Footer';
 import { MagneticButton } from '@/components/MagneticButton';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { useRevealOnScroll, useStaggerReveal } from '@/hooks/useRevealOnScroll';
+import { useParallax, useLayeredParallax } from '@/hooks/useParallax';
 import { cn } from '@/lib/utils';
 
 // ==================== CONTENT ====================
@@ -301,16 +302,33 @@ const whatsappContent = {
 // ==================== COMPONENTS ====================
 
 function WhatsAppHero() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.05);
+  const { containerRef, offsets } = useLayeredParallax(3, 0.08);
+  const heroContentParallax = useParallax({ speed: 0.15, direction: 'up' });
   
   const scrollToFlow = () => {
     document.getElementById('fluxos')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
+
   return (
-    <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
-      {/* Background grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
+    <section 
+      ref={containerRef as React.RefObject<HTMLElement>}
+      className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden"
+    >
+      {/* Background grid pattern with parallax */}
+      <div 
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[0]}px)`,
+          transition: 'transform 0.1s ease-out',
+        }}
+      >
         <div 
           className="absolute inset-0"
           style={{
@@ -323,27 +341,61 @@ function WhatsAppHero() {
         />
       </div>
       
-      {/* Ambient glow */}
+      {/* Ambient glow with parallax */}
       <div 
         className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full opacity-20 blur-[120px]"
-        style={{ background: 'hsl(var(--tech-cyan))' }}
+        style={{ 
+          background: 'hsl(var(--tech-cyan))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[1]}px)`,
+          transition: 'transform 0.15s ease-out',
+        }}
+      />
+      
+      {/* Secondary glow */}
+      <div 
+        className="absolute bottom-1/4 right-0 w-[400px] h-[300px] rounded-full opacity-10 blur-[100px]"
+        style={{ 
+          background: 'hsl(var(--tech-blue))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[2]}px)`,
+          transition: 'transform 0.15s ease-out',
+        }}
+      />
+      
+      {/* Floating accent elements */}
+      <div 
+        className="absolute top-1/3 left-[15%] w-2 h-2 rounded-full opacity-40"
+        style={{ 
+          background: 'hsl(var(--tech-cyan))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[2] * 1.2}px)`,
+          transition: 'transform 0.1s ease-out',
+          boxShadow: '0 0 20px 5px hsl(var(--tech-cyan) / 0.3)',
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-4xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-4xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible 
+              ? prefersReducedMotion ? 'none' : `translateY(${heroContentParallax.offset * 0.3}px)` 
+              : 'translateY(40px)',
+            transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
-          {/* Badges */}
+          {/* Badges with staggered animation */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {whatsappContent.hero.badges.map((badge, i) => (
               <span 
                 key={i}
                 className="badge-default"
-                style={{ transitionDelay: `${i * 100}ms` }}
+                style={{ 
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.9)',
+                  transition: `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)`,
+                  transitionDelay: `${300 + i * 100}ms`,
+                }}
               >
                 {badge}
               </span>
@@ -351,17 +403,38 @@ function WhatsAppHero() {
           </div>
           
           {/* Headline */}
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+          <h1 
+            className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 100ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 100ms',
+            }}
+          >
             {whatsappContent.hero.headline}
           </h1>
           
           {/* Subheadline */}
-          <p className="text-lg sm:text-xl text-foreground-muted max-w-2xl mx-auto mb-10">
+          <p 
+            className="text-lg sm:text-xl text-foreground-muted max-w-2xl mx-auto mb-10"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(25px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 200ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 200ms',
+            }}
+          >
             {whatsappContent.hero.subheadline}
           </p>
           
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div 
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 400ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 400ms',
+            }}
+          >
             <MagneticButton
               href={`https://wa.me/555596030135?text=${encodeURIComponent(whatsappContent.cta.whatsappMessage)}`}
               variant="primary"
@@ -380,23 +453,59 @@ function WhatsAppHero() {
           </div>
         </div>
       </div>
+      
+      {/* Scroll indicator */}
+      <div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        style={{
+          opacity: isVisible ? 0.5 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 1s ease-out 800ms, transform 1s ease-out 800ms',
+        }}
+      >
+        <div className="w-6 h-10 rounded-full border-2 border-foreground-muted/30 flex justify-center pt-2">
+          <div 
+            className="w-1 h-2 rounded-full bg-tech-cyan animate-bounce"
+            style={{ animationDuration: '2s' }}
+          />
+        </div>
+      </div>
     </section>
   );
 }
 
 function FeaturesSection() {
-  const { ref, isVisible } = useRevealOnScroll();
-  const { containerRef, getItemStyle } = useStaggerReveal(6, { baseDelay: 100, direction: 'up' });
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const { containerRef, getItemStyle } = useStaggerReveal(6, { baseDelay: 80, direction: 'up' });
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
+      {/* Decorative line */}
+      <div 
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24"
+        style={{ 
+          background: 'linear-gradient(to bottom, transparent, hsl(var(--tech-cyan) / 0.2), transparent)',
+        }}
+      />
+      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'text-center mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="text-center mb-14"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible 
+              ? prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.2}px)` 
+              : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {whatsappContent.features.title}
@@ -410,8 +519,11 @@ function FeaturesSection() {
           {whatsappContent.features.cards.map((card, index) => (
             <div
               key={index}
-              className="tech-card group"
-              style={getItemStyle(index)}
+              className="tech-card group transition-all duration-500 hover:scale-[1.02] hover:border-tech-cyan/40"
+              style={{
+                ...getItemStyle(index),
+                transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
             >
               <div className="flex items-start gap-4 mb-4">
                 <div 
@@ -447,22 +559,34 @@ function FeaturesSection() {
 }
 
 function FlowSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const sectionParallax = useParallax({ speed: 0.05, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section id="fluxos" className="py-20 relative">
+    <section id="fluxos" className="py-24 relative overflow-hidden">
       <div 
         className="absolute inset-0 opacity-50"
-        style={{ background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.3), transparent)' }}
+        style={{ 
+          background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.3), transparent)',
+          transform: prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.3}px)`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'text-center mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="text-center mb-14"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {whatsappContent.flow.title}
@@ -482,17 +606,19 @@ function FlowSection() {
               {whatsappContent.flow.steps.map((step, index) => (
                 <div
                   key={index}
-                  className={cn(
-                    'relative transition-all duration-500',
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                  )}
-                  style={{ transitionDelay: `${index * 100}ms` }}
+                  className="relative"
+                  style={{ 
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.95)',
+                    transition: `opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)`,
+                    transitionDelay: `${200 + index * 100}ms`,
+                  }}
                 >
-                  <div className="tech-card text-center h-full">
+                  <div className="tech-card text-center h-full transition-all duration-300 hover:scale-105 hover:border-tech-cyan/40">
                     {/* Step number */}
                     <div 
                       className="w-10 h-10 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10"
-                      style={{ 
+                      style={{
                         background: 'hsl(var(--tech-cyan) / 0.1)',
                         border: '1px solid hsl(var(--tech-cyan) / 0.3)',
                         boxShadow: '0 0 20px hsl(var(--tech-cyan) / 0.2)'
@@ -524,20 +650,30 @@ function FlowSection() {
 }
 
 function NichesSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
   const [activeTab, setActiveTab] = useState(0);
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible 
+              ? prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.2}px)` 
+              : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
-          <div className="text-center mb-12">
+          <div className="text-center mb-14">
             <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
               {whatsappContent.niches.title}
             </h2>
@@ -633,11 +769,12 @@ interface Message {
 }
 
 function ChatSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
   const [activeTopic, setActiveTopic] = useState(0);
   const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
   const prefersReducedMotion = useRef(
     typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   );
@@ -681,21 +818,25 @@ function ChatSection() {
   }, [displayedMessages]);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       <div 
         className="absolute inset-0 opacity-30"
-        style={{ background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.5), transparent)' }}
+        style={{ 
+          background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.5), transparent)',
+          transform: prefersReducedMotion.current ? 'none' : `translateY(${sectionParallax.offset * 0.3}px)`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
-          <div className="text-center mb-12">
+          <div className="text-center mb-14">
             <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
               {whatsappContent.chat.title}
             </h2>
@@ -832,23 +973,35 @@ function formatTime(seconds: number): string {
 }
 
 function KPIsSection() {
-  const { ref, isVisible } = useRevealOnScroll();
-  const { containerRef, getItemStyle } = useStaggerReveal(4, { baseDelay: 150, direction: 'scale' });
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const { containerRef, getItemStyle } = useStaggerReveal(4, { baseDelay: 100, direction: 'scale' });
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       <div 
         className="absolute inset-0 opacity-50"
-        style={{ background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.3), transparent)' }}
+        style={{ 
+          background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.3), transparent)',
+          transform: prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.3}px)`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'text-center mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="text-center mb-14"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {whatsappContent.kpis.title}
@@ -907,7 +1060,8 @@ function KPIsSection() {
 }
 
 function IntegrationsSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const { containerRef: chipsRef, getItemStyle } = useStaggerReveal(5, { baseDelay: 60, direction: 'scale' });
   
   const icons: { name: string; icon: typeof Database }[] = [
     { name: 'ERP', icon: Database },
@@ -918,14 +1072,16 @@ function IntegrationsSection() {
   ];
 
   return (
-    <section className="py-20">
+    <section className="py-24 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-3xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-3xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {whatsappContent.integrations.title}
@@ -934,11 +1090,12 @@ function IntegrationsSection() {
             {whatsappContent.integrations.subtitle}
           </p>
           
-          <div className="flex flex-wrap justify-center gap-4">
+          <div ref={chipsRef} className="flex flex-wrap justify-center gap-4">
             {icons.map((item, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border/30 transition-all hover:border-tech-cyan/30"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border/30 transition-all duration-300 hover:border-tech-cyan/50 hover:scale-110"
+                style={getItemStyle(i)}
               >
                 <item.icon className="w-5 h-5 text-tech-cyan" />
                 <span className="text-foreground">{item.name}</span>
@@ -947,29 +1104,47 @@ function IntegrationsSection() {
           </div>
         </div>
       </div>
+      
+      {/* Decorative line */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 bottom-0 w-px h-20"
+        style={{ background: 'linear-gradient(to bottom, hsl(var(--tech-cyan) / 0.3), transparent)' }}
+      />
     </section>
   );
 }
 
 function FinalCTA() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.1, '-30px');
   const whatsappUrl = `https://wa.me/555596030135?text=${encodeURIComponent(whatsappContent.cta.whatsappMessage)}`;
+  const ctaParallax = useParallax({ speed: 0.06, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section className="py-20 relative">
-      {/* Glow effect */}
+    <section className="py-28 relative overflow-hidden">
+      {/* Glow effect with parallax */}
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full opacity-10 blur-[100px]"
-        style={{ background: 'hsl(var(--primary))' }}
+        style={{ 
+          background: 'hsl(var(--primary))',
+          transform: prefersReducedMotion ? 'translate(-50%, -50%)' : `translate(-50%, calc(-50% + ${ctaParallax.offset * 0.3}px))`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-2xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-2xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(60px) scale(0.98)',
+            transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {whatsappContent.cta.title}

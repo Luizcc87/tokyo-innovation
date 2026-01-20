@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
   TrendingUp, 
@@ -24,6 +24,7 @@ import { Footer } from '@/components/Footer';
 import { MagneticButton } from '@/components/MagneticButton';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { useRevealOnScroll, useStaggerReveal } from '@/hooks/useRevealOnScroll';
+import { useParallax, useLayeredParallax } from '@/hooks/useParallax';
 import { cn } from '@/lib/utils';
 
 // ==================== CONTENT ====================
@@ -218,16 +219,33 @@ const dashboardsContent = {
 // ==================== COMPONENTS ====================
 
 function DashboardHero() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.05);
+  const { containerRef, offsets } = useLayeredParallax(3, 0.08);
+  const heroContentParallax = useParallax({ speed: 0.15, direction: 'up' });
   
   const scrollToExamples = () => {
     document.getElementById('exemplos')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
+
   return (
-    <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
-      {/* Background grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
+    <section 
+      ref={containerRef as React.RefObject<HTMLElement>}
+      className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden"
+    >
+      {/* Background grid pattern with parallax */}
+      <div 
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[0]}px)`,
+          transition: 'transform 0.1s ease-out',
+        }}
+      >
         <div 
           className="absolute inset-0"
           style={{
@@ -240,27 +258,61 @@ function DashboardHero() {
         />
       </div>
       
-      {/* Ambient glow */}
+      {/* Ambient glow with parallax */}
       <div 
         className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full opacity-20 blur-[120px]"
-        style={{ background: 'hsl(var(--tech-cyan))' }}
+        style={{ 
+          background: 'hsl(var(--tech-cyan))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[1]}px)`,
+          transition: 'transform 0.15s ease-out',
+        }}
+      />
+      
+      {/* Secondary glow */}
+      <div 
+        className="absolute bottom-1/3 right-0 w-[400px] h-[300px] rounded-full opacity-10 blur-[100px]"
+        style={{ 
+          background: 'hsl(var(--tech-blue))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[2]}px)`,
+          transition: 'transform 0.15s ease-out',
+        }}
+      />
+      
+      {/* Floating accent elements */}
+      <div 
+        className="absolute top-1/3 right-[15%] w-2 h-2 rounded-full opacity-40"
+        style={{ 
+          background: 'hsl(var(--tech-cyan))',
+          transform: prefersReducedMotion ? 'none' : `translateY(${offsets[2] * 1.2}px)`,
+          transition: 'transform 0.1s ease-out',
+          boxShadow: '0 0 20px 5px hsl(var(--tech-cyan) / 0.3)',
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-4xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-4xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible 
+              ? prefersReducedMotion ? 'none' : `translateY(${heroContentParallax.offset * 0.3}px)` 
+              : 'translateY(40px)',
+            transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
-          {/* Badges */}
+          {/* Badges with staggered animation */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {dashboardsContent.hero.badges.map((badge, i) => (
               <span 
                 key={i}
                 className="badge-default"
-                style={{ transitionDelay: `${i * 100}ms` }}
+                style={{ 
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.9)',
+                  transition: `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)`,
+                  transitionDelay: `${300 + i * 100}ms`,
+                }}
               >
                 {badge}
               </span>
@@ -268,17 +320,38 @@ function DashboardHero() {
           </div>
           
           {/* Headline */}
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+          <h1 
+            className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 100ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 100ms',
+            }}
+          >
             {dashboardsContent.hero.headline}
           </h1>
           
           {/* Subheadline */}
-          <p className="text-lg sm:text-xl text-foreground-muted max-w-2xl mx-auto mb-10">
+          <p 
+            className="text-lg sm:text-xl text-foreground-muted max-w-2xl mx-auto mb-10"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(25px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 200ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 200ms',
+            }}
+          >
             {dashboardsContent.hero.subheadline}
           </p>
           
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div 
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 400ms, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 400ms',
+            }}
+          >
             <MagneticButton
               href={`https://wa.me/5511999999999?text=${encodeURIComponent(dashboardsContent.cta.whatsappMessage)}`}
               variant="primary"
@@ -297,23 +370,59 @@ function DashboardHero() {
           </div>
         </div>
       </div>
+      
+      {/* Scroll indicator */}
+      <div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        style={{
+          opacity: isVisible ? 0.5 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 1s ease-out 800ms, transform 1s ease-out 800ms',
+        }}
+      >
+        <div className="w-6 h-10 rounded-full border-2 border-foreground-muted/30 flex justify-center pt-2">
+          <div 
+            className="w-1 h-2 rounded-full bg-tech-cyan animate-bounce"
+            style={{ animationDuration: '2s' }}
+          />
+        </div>
+      </div>
     </section>
   );
 }
 
 function ExamplesSection() {
-  const { ref, isVisible } = useRevealOnScroll();
-  const { containerRef, getItemStyle } = useStaggerReveal(4, { baseDelay: 100, direction: 'up' });
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const { containerRef, getItemStyle } = useStaggerReveal(4, { baseDelay: 80, direction: 'up' });
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section id="exemplos" className="py-20 relative">
+    <section id="exemplos" className="py-24 relative overflow-hidden">
+      {/* Decorative line */}
+      <div 
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24"
+        style={{ 
+          background: 'linear-gradient(to bottom, transparent, hsl(var(--tech-cyan) / 0.2), transparent)',
+        }}
+      />
+      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'text-center mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="text-center mb-14"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible 
+              ? prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.2}px)` 
+              : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {dashboardsContent.examples.title}
@@ -327,8 +436,11 @@ function ExamplesSection() {
           {dashboardsContent.examples.cards.map((card, index) => (
             <div
               key={index}
-              className="tech-card group"
-              style={getItemStyle(index)}
+              className="tech-card group transition-all duration-500 hover:scale-[1.02] hover:border-tech-cyan/40"
+              style={{
+                ...getItemStyle(index),
+                transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
             >
               <div className="flex items-start gap-4 mb-4">
                 <div 
@@ -371,24 +483,36 @@ function formatTime(seconds: number): string {
 }
 
 function KPIsSection() {
-  const { ref, isVisible } = useRevealOnScroll();
-  const { containerRef, getItemStyle } = useStaggerReveal(4, { baseDelay: 150, direction: 'scale' });
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const { containerRef, getItemStyle } = useStaggerReveal(4, { baseDelay: 100, direction: 'scale' });
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       {/* Subtle background */}
       <div 
         className="absolute inset-0 opacity-50"
-        style={{ background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.3), transparent)' }}
+        style={{ 
+          background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.3), transparent)',
+          transform: prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.3}px)`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'text-center mb-12 transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="text-center mb-14"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {dashboardsContent.kpis.title}
@@ -405,7 +529,7 @@ function KPIsSection() {
           {dashboardsContent.kpis.items.map((item, index) => (
             <div
               key={index}
-              className="tech-card text-center"
+              className="tech-card text-center transition-all duration-300 hover:scale-105 hover:border-tech-cyan/40"
               style={getItemStyle(index)}
             >
               <p className="text-sm text-foreground-muted mb-2">{item.label}</p>
@@ -451,19 +575,30 @@ function KPIsSection() {
 }
 
 function MarketingSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-4xl mx-auto transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-4xl mx-auto"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible 
+              ? prefersReducedMotion ? 'none' : `translateY(${sectionParallax.offset * 0.2}px)` 
+              : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
-          <div className="text-center mb-12">
+          <div className="text-center mb-14">
             <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
               {dashboardsContent.marketing.title}
             </h2>
@@ -554,11 +689,12 @@ interface Message {
 }
 
 function ChatSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
   const [activeTopic, setActiveTopic] = useState(0);
   const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const sectionParallax = useParallax({ speed: 0.04, direction: 'up' });
   const prefersReducedMotion = useRef(
     typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   );
@@ -602,21 +738,25 @@ function ChatSection() {
   }, [displayedMessages]);
 
   return (
-    <section className="py-20 relative">
+    <section className="py-24 relative overflow-hidden">
       <div 
         className="absolute inset-0 opacity-30"
-        style={{ background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.5), transparent)' }}
+        style={{ 
+          background: 'linear-gradient(180deg, transparent, hsl(var(--surface) / 0.5), transparent)',
+          transform: prefersReducedMotion.current ? 'none' : `translateY(${sectionParallax.offset * 0.3}px)`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
-          <div className="text-center mb-12">
+          <div className="text-center mb-14">
             <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
               {dashboardsContent.chat.title}
             </h2>
@@ -747,7 +887,8 @@ function ChatSection() {
 }
 
 function IntegrationsSection() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.08, '-30px');
+  const { containerRef: chipsRef, getItemStyle } = useStaggerReveal(4, { baseDelay: 60, direction: 'scale' });
   
   const icons = [
     { name: 'ERP', icon: Database },
@@ -757,14 +898,16 @@ function IntegrationsSection() {
   ];
 
   return (
-    <section className="py-20">
+    <section className="py-24 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-3xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-3xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+            transition: 'opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {dashboardsContent.integrations.title}
@@ -773,11 +916,12 @@ function IntegrationsSection() {
             {dashboardsContent.integrations.subtitle}
           </p>
           
-          <div className="flex flex-wrap justify-center gap-4 mb-6">
+          <div ref={chipsRef} className="flex flex-wrap justify-center gap-4 mb-6">
             {icons.map((item, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border/30 transition-all hover:border-tech-cyan/30"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border/30 transition-all duration-300 hover:border-tech-cyan/50 hover:scale-110"
+                style={getItemStyle(i)}
               >
                 <item.icon className="w-5 h-5 text-tech-cyan" />
                 <span className="text-foreground">{item.name}</span>
@@ -790,29 +934,47 @@ function IntegrationsSection() {
           </p>
         </div>
       </div>
+      
+      {/* Decorative line */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 bottom-0 w-px h-20"
+        style={{ background: 'linear-gradient(to bottom, hsl(var(--tech-cyan) / 0.3), transparent)' }}
+      />
     </section>
   );
 }
 
 function FinalCTA() {
-  const { ref, isVisible } = useRevealOnScroll();
+  const { ref, isVisible } = useRevealOnScroll(0.1, '-30px');
   const whatsappUrl = `https://wa.me/5511999999999?text=${encodeURIComponent(dashboardsContent.cta.whatsappMessage)}`;
+  const ctaParallax = useParallax({ speed: 0.06, direction: 'up' });
+
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : false,
+  []);
 
   return (
-    <section className="py-20 relative">
-      {/* Glow effect */}
+    <section className="py-28 relative overflow-hidden">
+      {/* Glow effect with parallax */}
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full opacity-10 blur-[100px]"
-        style={{ background: 'hsl(var(--primary))' }}
+        style={{ 
+          background: 'hsl(var(--primary))',
+          transform: prefersReducedMotion ? 'translate(-50%, -50%)' : `translate(-50%, calc(-50% + ${ctaParallax.offset * 0.3}px))`,
+        }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
           ref={ref}
-          className={cn(
-            'max-w-2xl mx-auto text-center transition-all duration-700',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+          className="max-w-2xl mx-auto text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(60px) scale(0.98)',
+            transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {dashboardsContent.cta.title}
